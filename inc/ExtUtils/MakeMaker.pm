@@ -1,5 +1,5 @@
 #line 1
-# $Id: /local/schwern.org/CPAN/ExtUtils-MakeMaker/trunk/lib/ExtUtils/MakeMaker.pm 4535 2005-05-20T23:08:34.937906Z schwern  $
+# $Id: /mirror/svn.schwern.org/CPAN/ExtUtils-MakeMaker/trunk/lib/ExtUtils/MakeMaker.pm 41145 2007-12-08T01:01:11.051959Z schwern  $
 package ExtUtils::MakeMaker;
 
 BEGIN {require 5.005_03;}
@@ -11,9 +11,9 @@ use File::Path;
 
 use vars qw(
             @ISA @EXPORT @EXPORT_OK
-            $VERSION $Verbose %Config 
+            $VERSION $Verbose %Config
             @Prepend_parent @Parent
-            %Recognized_Att_Keys @Get_from_Config @MM_Sections @Overridable 
+            %Recognized_Att_Keys @Get_from_Config @MM_Sections @Overridable
             $Filename
            );
 
@@ -22,12 +22,13 @@ use vars qw(
 use vars qw($Revision);
 use strict;
 
-$VERSION = '6.30';
-($Revision = q$Revision: 4535 $) =~ /Revision:\s+(\S+)/;
+$VERSION = '6.42';
+($Revision) = q$Revision: 41145 $ =~ /Revision:\s+(\S+)/;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&WriteMakefile &writeMakefile $Verbose &prompt);
-@EXPORT_OK = qw($VERSION &neatvalue &mkbootstrap &mksymlists);
+@EXPORT_OK = qw($VERSION &neatvalue &mkbootstrap &mksymlists
+                &WriteEmptyMakefile);
 
 # These will go away once the last of the Win32 & VMS specific code is 
 # purged.
@@ -68,40 +69,42 @@ sub WriteMakefile {
 # scalar.
 my %Att_Sigs;
 my %Special_Sigs = (
- C                  => 'array',
- CONFIG             => 'array',
- CONFIGURE          => 'code',
- DIR                => 'array',
- DL_FUNCS           => 'hash',
- DL_VARS            => 'array',
- EXCLUDE_EXT        => 'array',
- EXE_FILES          => 'array',
- FUNCLIST           => 'array',
- H                  => 'array',
- IMPORTS            => 'hash',
- INCLUDE_EXT        => 'array',
- LIBS               => ['array',''],
- MAN1PODS           => 'hash',
- MAN3PODS           => 'hash',
- PL_FILES           => 'hash',
- PM                 => 'hash',
- PMLIBDIRS          => 'array',
- PREREQ_PM          => 'hash',
- SKIP               => 'array',
- TYPEMAPS           => 'array',
- XS                 => 'hash',
+ C                  => 'ARRAY',
+ CONFIG             => 'ARRAY',
+ CONFIGURE          => 'CODE',
+ DIR                => 'ARRAY',
+ DL_FUNCS           => 'HASH',
+ DL_VARS            => 'ARRAY',
+ EXCLUDE_EXT        => 'ARRAY',
+ EXE_FILES          => 'ARRAY',
+ FUNCLIST           => 'ARRAY',
+ H                  => 'ARRAY',
+ IMPORTS            => 'HASH',
+ INCLUDE_EXT        => 'ARRAY',
+ LIBS               => ['ARRAY',''],
+ MAN1PODS           => 'HASH',
+ MAN3PODS           => 'HASH',
+ PL_FILES           => 'HASH',
+ PM                 => 'HASH',
+ PMLIBDIRS          => 'ARRAY',
+ PMLIBPARENTDIRS    => 'ARRAY',
+ PREREQ_PM          => 'HASH',
+ SKIP               => 'ARRAY',
+ TYPEMAPS           => 'ARRAY',
+ XS                 => 'HASH',
+ VERSION            => ['version',''],
  _KEEP_AFTER_FLUSH  => '',
 
- clean      => 'hash',
- depend     => 'hash',
- dist       => 'hash',
- dynamic_lib=> 'hash',
- linkext    => 'hash',
- macro      => 'hash',
- postamble  => 'hash',
- realclean  => 'hash',
- test       => 'hash',
- tool_autosplit => 'hash',
+ clean      => 'HASH',
+ depend     => 'HASH',
+ dist       => 'HASH',
+ dynamic_lib=> 'HASH',
+ linkext    => 'HASH',
+ macro      => 'HASH',
+ postamble  => 'HASH',
+ realclean  => 'HASH',
+ test       => 'HASH',
+ tool_autosplit => 'HASH',
 );
 
 @Att_Sigs{keys %Recognized_Att_Keys} = ('') x keys %Recognized_Att_Keys;
@@ -119,18 +122,27 @@ sub _verify_att {
         }
 
         my @sigs   = ref $sig ? @$sig : $sig;
-        my $given = lc ref $val;
-        unless( grep $given eq $_, @sigs ) {
-            my $takes = join " or ", map { $_ ne '' ? "$_ reference"
-                                                    : "string/number"
-                                         } @sigs;
-            my $has   = $given ne '' ? "$given reference"
-                                     : "string/number";
+        my $given  = ref $val;
+        unless( grep { $given eq $_ || ($_ && eval{$val->isa($_)}) } @sigs ) {
+            my $takes = join " or ", map { _format_att($_) } @sigs;
+
+            my $has = _format_att($given);
             warn "WARNING: $key takes a $takes not a $has.\n".
                  "         Please inform the author.\n";
         }
     }
 }
+
+
+sub _format_att {
+    my $given = shift;
+    
+    return $given eq ''        ? "string/number"
+         : uc $given eq $given ? "$given reference"
+         :                       "$given object"
+         ;
+}
+
 
 sub prompt ($;$) {
     my($mess, $def) = @_;
@@ -209,13 +221,13 @@ sub full_setup {
 
     AUTHOR ABSTRACT ABSTRACT_FROM BINARY_LOCATION
     C CAPI CCFLAGS CONFIG CONFIGURE DEFINE DIR DISTNAME DL_FUNCS DL_VARS
-    EXCLUDE_EXT EXE_FILES FIRST_MAKEFILE
+    EXCLUDE_EXT EXE_FILES EXTRA_META FIRST_MAKEFILE
     FULLPERL FULLPERLRUN FULLPERLRUNINST
     FUNCLIST H IMPORTS
 
     INST_ARCHLIB INST_SCRIPT INST_BIN INST_LIB INST_MAN1DIR INST_MAN3DIR
     INSTALLDIRS
-    DESTDIR PREFIX INSTALLBASE
+    DESTDIR PREFIX INSTALL_BASE
     PERLPREFIX      SITEPREFIX      VENDORPREFIX
     INSTALLPRIVLIB  INSTALLSITELIB  INSTALLVENDORLIB
     INSTALLARCHLIB  INSTALLSITEARCH INSTALLVENDORARCH
@@ -223,16 +235,16 @@ sub full_setup {
     INSTALLMAN1DIR          INSTALLMAN3DIR
     INSTALLSITEMAN1DIR      INSTALLSITEMAN3DIR
     INSTALLVENDORMAN1DIR    INSTALLVENDORMAN3DIR
-    INSTALLSCRIPT 
+    INSTALLSCRIPT   INSTALLSITESCRIPT  INSTALLVENDORSCRIPT
     PERL_LIB        PERL_ARCHLIB 
     SITELIBEXP      SITEARCHEXP 
 
-    INC INCLUDE_EXT LDFROM LIB LIBPERL_A LIBS
-    LINKTYPE MAKEAPERL MAKEFILE MAKEFILE_OLD MAN1PODS MAN3PODS MAP_TARGET 
+    INC INCLUDE_EXT LDFROM LIB LIBPERL_A LIBS LICENSE
+    LINKTYPE MAKE MAKEAPERL MAKEFILE MAKEFILE_OLD MAN1PODS MAN3PODS MAP_TARGET 
     MYEXTLIB NAME NEEDS_LINKING NOECHO NO_META NORECURS NO_VC OBJECT OPTIMIZE 
     PERL_MALLOC_OK PERL PERLMAINCC PERLRUN PERLRUNINST PERL_CORE
     PERL_SRC PERM_RW PERM_RWX
-    PL_FILES PM PM_FILTER PMLIBDIRS POLLUTE PPM_INSTALL_EXEC
+    PL_FILES PM PM_FILTER PMLIBDIRS PMLIBPARENTDIRS POLLUTE PPM_INSTALL_EXEC
     PPM_INSTALL_SCRIPT PREREQ_FATAL PREREQ_PM PREREQ_PRINT PRINT_PREREQ
     SIGN SKIP TYPEMAPS VERSION VERSION_FROM XS XSOPT XSPROTOARG
     XS_VERSION clean depend dist dynamic_lib linkext macro realclean
@@ -282,7 +294,10 @@ sub full_setup {
     push @Overridable, qw[
 
  libscan makeaperl needs_linking perm_rw perm_rwx
- subdir_x test_via_harness test_via_script init_PERL
+ subdir_x test_via_harness test_via_script 
+
+ init_VERSION init_dist init_INST init_INSTALL init_DEST init_dirscan
+ init_PM init_MANPODS init_xs init_PERL init_DIRFILESEP init_linker
                          ];
 
     push @MM_Sections, qw[
@@ -301,9 +316,9 @@ sub full_setup {
     # we will use all these variables in the Makefile
     @Get_from_Config = 
         qw(
-           ar cc cccdlflags ccdlflags dlext dlsrc ld lddlflags ldflags libc
-           lib_ext obj_ext osname osvers ranlib sitelibexp sitearchexp so
-           exe_ext full_ar
+           ar cc cccdlflags ccdlflags dlext dlsrc exe_ext full_ar ld 
+           lddlflags ldflags libc lib_ext obj_ext osname osvers ranlib 
+           sitelibexp sitearchexp so
           );
 
     # 5.5.3 doesn't have any concept of vendor libs
@@ -411,13 +426,18 @@ sub new {
               $self->{PREREQ_PM}->{$prereq} : 'unknown version' ;
         }
     }
-    if (%unsatisfied && $self->{PREREQ_FATAL}){
-        my $failedprereqs = join ', ', map {"$_ $unsatisfied{$_}"} 
-                            keys %unsatisfied;
-        die qq{MakeMaker FATAL: prerequisites not found ($failedprereqs)\n
-               Please install these modules first and rerun 'perl Makefile.PL'.\n};
-    }
+    
+     if (%unsatisfied && $self->{PREREQ_FATAL}){
+        my $failedprereqs = join "\n", map {"    $_ $unsatisfied{$_}"} 
+                            sort { $a cmp $b } keys %unsatisfied;
+        die <<"END";
+MakeMaker FATAL: prerequisites not found.
+$failedprereqs
 
+Please install these modules first and rerun 'perl Makefile.PL'.
+END
+    }
+    
     if (defined $self->{CONFIGURE}) {
         if (ref $self->{CONFIGURE} eq 'CODE') {
             %configure_att = %{&{$self->{CONFIGURE}}};
@@ -473,7 +493,7 @@ sub new {
         }
         if ($self->{PARENT}) {
             $self->{PARENT}->{CHILDREN}->{$newclass} = $self;
-            foreach my $opt (qw(POLLUTE PERL_CORE)) {
+            foreach my $opt (qw(POLLUTE PERL_CORE LINKTYPE)) {
                 if (exists $self->{PARENT}->{$opt}
                     and not exists $self->{$opt})
                     {
@@ -488,10 +508,12 @@ sub new {
         parse_args($self,split(' ', $ENV{PERL_MM_OPT} || ''),@ARGV);
     }
 
+
     $self->{NAME} ||= $self->guess_name;
 
     ($self->{NAME_SYM} = $self->{NAME}) =~ s/\W+/_/g;
 
+    $self->init_MAKE;
     $self->init_main;
     $self->init_VERSION;
     $self->init_dist;
@@ -499,10 +521,13 @@ sub new {
     $self->init_INSTALL;
     $self->init_DEST;
     $self->init_dirscan;
+    $self->init_PM;
+    $self->init_MANPODS;
     $self->init_xs;
     $self->init_PERL;
     $self->init_DIRFILESEP;
     $self->init_linker;
+    $self->init_ABSTRACT;
 
     if (! $self->{PERL_SRC} ) {
         require VMS::Filespec if $Is_VMS;
@@ -613,7 +638,9 @@ END
             my(%a) = %{$self->{$section} || {}};
             push @{$self->{RESULT}}, "\n# --- MakeMaker $section section:";
             push @{$self->{RESULT}}, "# " . join ", ", %a if $Verbose && %a;
-            push @{$self->{RESULT}}, $self->nicetext($self->$method( %a ));
+            push @{$self->{RESULT}}, $self->maketext_filter(
+                $self->$method( %a )
+            );
         }
     }
 
@@ -623,32 +650,33 @@ END
 }
 
 sub WriteEmptyMakefile {
-    Carp::croak "WriteEmptyMakefile: Need even number of args" if @_ % 2;
+    Carp::croak "WriteEmptyMakefile: Need an even number of args" if @_ % 2;
 
     my %att = @_;
     my $self = MM->new(\%att);
-    if (-f $self->{MAKEFILE_OLD}) {
-      _unlink($self->{MAKEFILE_OLD}) or 
-        warn "unlink $self->{MAKEFILE_OLD}: $!";
+    
+    my $new = $self->{MAKEFILE};
+    my $old = $self->{MAKEFILE_OLD};
+    if (-f $old) {
+        _unlink($old) or warn "unlink $old: $!";
     }
-    if ( -f $self->{MAKEFILE} ) {
-        _rename($self->{MAKEFILE}, $self->{MAKEFILE_OLD}) or
-          warn "rename $self->{MAKEFILE} => $self->{MAKEFILE_OLD}: $!"
+    if ( -f $new ) {
+        _rename($new, $old) or warn "rename $new => $old: $!"
     }
-    open MF, '>'.$self->{MAKEFILE} or die "open $self->{MAKEFILE} for write: $!";
+    open MF, '>'.$new or die "open $new for write: $!";
     print MF <<'EOP';
-all:
+all :
 
-clean:
+clean :
 
-install:
+install :
 
-makemakerdflt:
+makemakerdflt :
 
-test:
+test :
 
 EOP
-    close MF or die "close $self->{MAKEFILE} for write: $!";
+    close MF or die "close $new for write: $!";
 }
 
 sub check_manifest {
@@ -873,9 +901,11 @@ sub flush {
     my $self = shift;
     my($chunk);
     local *FH;
-    print STDOUT "Writing $self->{MAKEFILE} for $self->{NAME}\n";
 
-    unlink($self->{MAKEFILE}, "MakeMaker.tmp", $Is_VMS ? 'Descrip.MMS' : '');
+    my $finalname = $self->{MAKEFILE};
+    print STDOUT "Writing $finalname for $self->{NAME}\n";
+
+    unlink($finalname, "MakeMaker.tmp", $Is_VMS ? 'Descrip.MMS' : ());
     open(FH,">MakeMaker.tmp") or die "Unable to open MakeMaker.tmp: $!";
 
     for $chunk (@{$self->{RESULT}}) {
@@ -883,7 +913,6 @@ sub flush {
     }
 
     close FH;
-    my($finalname) = $self->{MAKEFILE};
     _rename("MakeMaker.tmp", $finalname) or
       warn "rename MakeMaker.tmp => $finalname: $!";
     chmod 0644, $finalname unless $Is_VMS;
@@ -980,4 +1009,4 @@ sub selfdocument {
 
 __END__
 
-#line 2519
+#line 2640

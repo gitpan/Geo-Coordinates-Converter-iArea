@@ -3,10 +3,10 @@ abstract: get center point from iArea
 author: 
   - Tokuhiro Matsuno <tokuhirom aaaatttt gmail dotottto commmmm>
 build_requires: 
-  ExtUtils::MakeMaker: 6.11
+  ExtUtils::MakeMaker: 6.42
   Test::More: 0
 distribution_type: module
-generated_by: Module::Install version 0.68
+generated_by: Module::Install version 0.680
 license: perl
 meta-spec: 
   url: http://module-build.sourceforge.net/META-spec-v1.3.html
@@ -19,4 +19,4 @@ no_index:
 requires: 
   File::ShareDir: 0
   Geo::Coordinates::Converter: 0
-version: 0.04
+version: 0.05

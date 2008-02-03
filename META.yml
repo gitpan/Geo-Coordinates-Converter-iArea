@@ -17,6 +17,8 @@ no_index:
     - inc
     - t
 requires: 
+  CDB_File: 0
   File::ShareDir: 0
   Geo::Coordinates::Converter: 0
-version: 0.05
+  perl: 5.8.0
+version: 0.06

@@ -1,7 +1,7 @@
 package Geo::Coordinates::Converter::iArea;
 use strict;
 use warnings;
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 use 5.00800;
 use Geo::Coordinates::Converter;
 use CDB_File;
@@ -52,24 +52,13 @@ Geo::Coordinates::Converter::iArea is utilities for DoCoMo iArea.
 
 easy to get the center point of area.
 
-=head1 DATA FILE FORMAT
-
-    areacode,lat,lng
-
-csv format.
-
-=head1 Note
-
-This module very slow. But, this module is only for small edge case.
-This modules is called by very old obsolete DoCoMo phones, called MOVA.
-
-Please use posinfo=1 when user's phone is FOMA.
-
 =head1 AUTHOR
 
 Tokuhiro Matsuno E<lt>tokuhirom aaaatttt gmail dotottto commmmmE<gt>
 
 =head1 SEE ALSO
+
+L<Geo::Coordinates::Converter>
 
 =head1 LICENSE
 

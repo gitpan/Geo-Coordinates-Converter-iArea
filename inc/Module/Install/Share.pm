@@ -6,7 +6,7 @@ use Module::Install::Base;
 
 use vars qw{$VERSION $ISCORE @ISA};
 BEGIN {
-	$VERSION = '0.68';
+	$VERSION = '0.72';
 	$ISCORE  = 1;
 	@ISA     = qw{Module::Install::Base};
 }
@@ -31,10 +31,13 @@ END_MAKEFILE
 	# So when we need to install a share directory, make sure we add a
 	# dependency on a moderately new version of ExtUtils::MakeMaker.
 	$self->build_requires( 'ExtUtils::MakeMaker' => '6.11' );
+
+	# 99% of the time we don't want to index a shared dir
+	$self->no_index( directory => $dir );
 }
 
 1;
 
 __END__
 
-#line 98
+#line 101

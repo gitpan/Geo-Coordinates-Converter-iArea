@@ -1,7 +1,7 @@
 package Geo::Coordinates::Converter::iArea;
 use strict;
 use warnings;
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 use 5.00800;
 use Geo::Coordinates::Converter;
 use CDB_File;
@@ -51,6 +51,12 @@ THIS MODULE IS IN ITS BETA QUALITY. THE API MAY CHANGE IN THE FUTURE.
 Geo::Coordinates::Converter::iArea is utilities for DoCoMo iArea.
 
 easy to get the center point of area.
+
+=head1 METHODS
+
+=head2 get_center
+
+get center of area code.
 
 =head1 AUTHOR
 

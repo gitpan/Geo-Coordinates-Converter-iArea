@@ -4,11 +4,10 @@ author:
   - 'Tokuhiro Matsuno <tokuhirom aaaatttt gmail dotottto commmmm>'
 build_requires:
   ExtUtils::MakeMaker: 6.42
-  Test::More: 0
 configure_requires:
   ExtUtils::MakeMaker: 6.42
 distribution_type: module
-generated_by: 'Module::Install version 0.91'
+generated_by: 'Module::Install version 0.99'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -21,11 +20,10 @@ no_index:
     - t
     - xt
 requires:
-  CDB_File: 0.96
-  File::ShareDir: 1
+  File::ShareDir: 1.02
   Filter::Util::Call: 0
   Geo::Coordinates::Converter: 0.04
   perl: 5.8.0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.09
+version: 0.10

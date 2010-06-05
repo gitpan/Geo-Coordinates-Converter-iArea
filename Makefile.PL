@@ -2,9 +2,9 @@ use inc::Module::Install;
 name 'Geo-Coordinates-Converter-iArea';
 all_from 'lib/Geo/Coordinates/Converter/iArea.pm';
 
-requires 'File::ShareDir' => 1.00;
 requires 'Geo::Coordinates::Converter' => 0.04;
-requires 'CDB_File' => 0.96;
+requires 'File::ShareDir' => 1.02;
+requires 'Geo::Coordinates::Converter' => 0.04;
 
 author_tests('xt');
 install_share 'share';

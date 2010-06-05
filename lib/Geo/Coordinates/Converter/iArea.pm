@@ -1,7 +1,7 @@
 package Geo::Coordinates::Converter::iArea;
 use strict;
 use warnings;
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 use 5.00800;
 use Geo::Coordinates::Converter;
 use CDB_File;
@@ -22,6 +22,20 @@ sub get_center {
             format   => 'degree',
             areacode => $areacode,
         );
+    } else {
+        return;
+    }
+}
+
+sub get_name {
+    my ($class, $areacode) = @_;
+
+    my $file = dist_file('Geo-Coordinates-Converter-iArea', 'areacode2name.cdb');
+    my $cdb = CDB_File->TIEHASH($file);
+    if ($cdb->EXISTS($areacode)) {
+        my $name = $cdb->FETCH($areacode);
+        utf8::decode($name);
+        return $name;
     } else {
         return;
     }

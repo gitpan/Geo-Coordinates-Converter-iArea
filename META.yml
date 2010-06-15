@@ -20,10 +20,11 @@ no_index:
     - t
     - xt
 requires:
+  CDB_File: 0.96
   File::ShareDir: 1.02
   Filter::Util::Call: 0
   Geo::Coordinates::Converter: 0.04
   perl: 5.8.0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.10
+version: 0.11

@@ -4,6 +4,7 @@ author:
   - 'Tokuhiro Matsuno <tokuhirom aaaatttt gmail dotottto commmmm>'
 build_requires:
   ExtUtils::MakeMaker: 6.42
+  Test::More: 0.96
 configure_requires:
   ExtUtils::MakeMaker: 6.42
 distribution_type: module
@@ -22,9 +23,8 @@ no_index:
 requires:
   CDB_File: 0.96
   File::ShareDir: 1.02
-  Filter::Util::Call: 0
   Geo::Coordinates::Converter: 0.04
   perl: 5.8.0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.12
+version: 0.13

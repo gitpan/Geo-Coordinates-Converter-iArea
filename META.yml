@@ -23,8 +23,8 @@ no_index:
 requires:
   CDB_File: 0.96
   File::ShareDir: 1.02
-  Geo::Coordinates::Converter: 0.04
+  Geo::Coordinates::Converter: 0.09
   perl: 5.8.0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.13
+version: 0.14
